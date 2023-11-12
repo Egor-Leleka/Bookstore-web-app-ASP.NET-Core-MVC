@@ -1,4 +1,7 @@
 using Bookstore.DataAccess.Data;
+using Bookstore.DataAccess.Repository;
+using Bookstore.DataAccess.Repository.IRepository;
+using Bookstore.Models.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -10,7 +13,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<Entities>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("Bookstore"))); // Add db context.
 
-builder.Services.AddScoped<Entities>(); // Add dependency injection.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // Add dependency injection.
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -45,6 +48,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
 	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+	pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
