@@ -3,7 +3,6 @@ using Bookstore.Models.Models;
 using Bookstore.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel;
 
 namespace BookstoreWeb.Areas.Admin.Controllers
 {
@@ -11,15 +10,18 @@ namespace BookstoreWeb.Areas.Admin.Controllers
 	public class ProductController : Controller
 	{
 		private readonly IUnitOfWork _unitOfWork;
-		public ProductController(IUnitOfWork unitOfWork)
+		private readonly IWebHostEnvironment _webHostEnvironment;
+
+		public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
 		{
 			_unitOfWork = unitOfWork;
+			_webHostEnvironment = webHostEnvironment;
 		}
 
 		public IActionResult Index()
 		{
-			List<Product> productList = _unitOfWork.Product.GetAll().ToList();
-			
+			List<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+
 			return View(productList);
 		}
 
@@ -37,25 +39,57 @@ namespace BookstoreWeb.Areas.Admin.Controllers
 				Product = new Product()
 			};
 
-			if(id.Equals(null) || id == 0)
+			if (id == null || id == 0)
 			{
 				// Create.
 				return View(productViewModel);
 			}
 			else
 			{
+				// Update.
 				productViewModel.Product = _unitOfWork.Product.Get(p => p.Id == id);
-				return View(productViewModel); 
+				return View(productViewModel);
 			}
 		}
 
 		[HttpPost]
 		public IActionResult Upsert(ProductViewModel productViewModel, IFormFile? file)
 		{
-			// Check input validation
 			if (ModelState.IsValid)
 			{
-				_unitOfWork.Product.Add(productViewModel.Product);
+				string wwwRootPath = _webHostEnvironment.WebRootPath;
+				if (file != null)
+				{
+					string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+					string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+					if (!string.IsNullOrEmpty(productViewModel.Product.ImageUrl))
+					{
+						// Delete old image.
+						var oldImagePath =
+							Path.Combine(wwwRootPath, productViewModel.Product.ImageUrl.TrimStart('\\'));
+
+						if (System.IO.File.Exists(oldImagePath))
+							System.IO.File.Delete(oldImagePath);
+					}
+
+					using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+					{
+						file.CopyTo(fileStream);
+					}
+
+					productViewModel.Product.ImageUrl = @"\images\product\" + fileName;
+				}
+
+				if (productViewModel.Product.Id == 0)
+				{
+					_unitOfWork.Product.Add(productViewModel.Product);
+				}
+				else
+				{
+					_unitOfWork.Product.Update(productViewModel.Product);
+				}
+
 				_unitOfWork.Save();
 				TempData["success"] = "Product created seccessfully!";
 				return RedirectToAction("Index", "Product");
@@ -72,16 +106,19 @@ namespace BookstoreWeb.Areas.Admin.Controllers
 			}
 		}
 
+		// Using API for deleting.
+		/*
 		[HttpGet]
-		public IActionResult Delete(int? id) 
+		public IActionResult Delete(int? id)
 		{
 			var product = _unitOfWork.Product.Get(p => p.Id == id);
 
-			if(product == null)
+			if (product == null)
 				return NotFound();
 
 			return View(product);
 		}
+		*/
 
 		[HttpPost, ActionName("Delete")]
 		public IActionResult DeletePost(int? id)
@@ -96,5 +133,37 @@ namespace BookstoreWeb.Areas.Admin.Controllers
 			TempData["success"] = "Product deleted seccessfully!";
 			return RedirectToAction("Index", "Product");
 		}
+
+		#region API CALLS
+
+		[HttpGet]
+		public IActionResult GetAll()
+		{
+			List<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+
+			return Json(new { data = productList });
+		}
+
+		[HttpDelete]
+		public IActionResult Delete(int? id)
+		{
+			var productToBeDeleted = _unitOfWork.Product.Get(p => p.Id == id);
+			if (productToBeDeleted == null)
+				return Json(new { success = false, message = "Error occured while deleting" });
+
+			var oldImagePath =
+							Path.Combine(_webHostEnvironment.WebRootPath,
+							productToBeDeleted.ImageUrl.TrimStart('\\'));
+
+			if (System.IO.File.Exists(oldImagePath))
+				System.IO.File.Delete(oldImagePath);
+
+			_unitOfWork.Product.Remove(productToBeDeleted);
+			_unitOfWork.Save();
+			return Json(new { success = true, message = "Product deleted successfully" });
+		}
+
+
+		#endregion
 	}
 }

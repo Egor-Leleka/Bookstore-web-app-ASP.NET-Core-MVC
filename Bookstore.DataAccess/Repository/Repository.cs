@@ -1,4 +1,5 @@
-﻿using Bookstore.DataAccess.Data;
+﻿using Azure;
+using Bookstore.DataAccess.Data;
 using Bookstore.DataAccess.Repository.IRepository;
 using Bookstore.Models.Models;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +10,16 @@ namespace Bookstore.DataAccess.Repository
 	public class Repository<T> : IRepository<T> where T : class
 	{
 		private readonly Entities _entities;
-		private DbSet<T> entitiesSet; // Field to hold the DbSet corresponding to the entity type T
+		private DbSet<T> entitiesSet; 
 
 		public Repository(Entities entities)
 		{
 			_entities = entities;
 			this.entitiesSet = _entities.Set<T>();
+
+			// Loading related data for the Products entity (when fetching each product from Products,
+			// the related Category data (ForeignKey) is also automatically loaded).
+			_entities.Products.Include(c => c.Category).Include(c => c.CategoryId);
 		}
 
 		public void Add(T entity)
@@ -32,18 +37,34 @@ namespace Bookstore.DataAccess.Repository
 			entitiesSet.RemoveRange(entities);
 		}
 
-		public T Get(Expression<Func<T, bool>> filter)
+		public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
 		{
 			IQueryable<T> query = entitiesSet;
 			query = query.Where(filter);
+
+			if (!string.IsNullOrEmpty(includeProperties))
+			{
+				foreach (var includeProperty in includeProperties
+					.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					query = query.Include(includeProperty);
+				}
+			}
 			return query.FirstOrDefault();
 		}
 
-		public IEnumerable<T> GetAll()
+		public IEnumerable<T> GetAll(string? includeProperties = null)
 		{
 			IQueryable<T> query = entitiesSet;
+			if (!string.IsNullOrEmpty(includeProperties))
+			{
+				foreach (var includeProperty in includeProperties
+					.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					query = query.Include(includeProperty);
+				}
+			}
 			return query.ToList();
 		}
-
 	}
 }

@@ -20,7 +20,23 @@ namespace Bookstore.DataAccess.Repository
 
 		public void Update(Product product)
 		{
-			_entities.Update(product);
+			var productFromDb = _entities.Products.FirstOrDefault(p => p.Id == product.Id);
+			if (productFromDb != null)
+			{
+				productFromDb.Title = product.Title;
+				productFromDb.ISBN = product.ISBN;
+				productFromDb.ListPrice = product.ListPrice;
+				productFromDb.Price = product.Price;
+				productFromDb.Price50 = product.Price50;
+				productFromDb.Price100 = product.Price100;
+				productFromDb.Author = product.Author;
+				productFromDb.Description = product.Description;
+				productFromDb.Category = product.Category;
+				productFromDb.CategoryId = product.CategoryId;
+
+				if (product.ImageUrl != null )
+					productFromDb.ImageUrl = product.ImageUrl;
+			}
 		}
 	}
 }
