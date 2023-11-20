@@ -1,18 +1,22 @@
 ﻿using Bookstore.Models.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookstore.DataAccess.Data
 {
-	public class Entities : DbContext
+	public class Entities : IdentityDbContext
 	{
 		// Creat tabels in database.
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Product> Products { get; set; }
+        public DbSet<ApplicationUser>  ApplicationUsers { get; set; }
 
-		public Entities(DbContextOptions<Entities> options) : base(options) { }
+        public Entities(DbContextOptions<Entities> options) : base(options) { }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			base.OnModelCreating(modelBuilder);
+
 			// Seed data.
 			modelBuilder.Entity<Category>().HasData(
 				new Category { Id = 1, Name = "Action", DisplayOrder = 1 },

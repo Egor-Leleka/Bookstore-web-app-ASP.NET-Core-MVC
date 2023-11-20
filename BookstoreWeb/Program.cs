@@ -1,9 +1,10 @@
 using Bookstore.DataAccess.Data;
 using Bookstore.DataAccess.Repository;
 using Bookstore.DataAccess.Repository.IRepository;
-using Bookstore.Models.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Bookstore.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,23 +14,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<Entities>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("Bookstore"))); // Add db context.
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // Add dependency injection.
-
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<Entities>().AddDefaultTokenProviders();
+builder.Services.ConfigureApplicationCookie(options =>
 {
-	c.AddServer(new OpenApiServer
-	{
-		Description = "Development Server",
-		Url = "https://localhost:7224"
-	});
-
-	c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"] + e.ActionDescriptor.RouteValues["controller"]}");
-
+	options.LoginPath = $"/Identity/Account/Login";
+	options.LogoutPath = $"/Identity/Account/Logout";
+	options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
-var app = builder.Build();
+builder.Services.AddRazorPages();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // Add dependency injection.
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
-app.UseSwagger().UseSwaggerUI();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -43,9 +40,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapRazorPages();
 app.MapControllerRoute(
 	name: "default",
 	pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
