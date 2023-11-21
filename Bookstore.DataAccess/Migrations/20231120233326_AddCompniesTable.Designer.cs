@@ -4,6 +4,7 @@ using Bookstore.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bookstore.DataAccess.Migrations
 {
     [DbContext(typeof(Entities))]
-    partial class EntitiesModelSnapshot : ModelSnapshot
+    [Migration("20231120233326_AddCompniesTable")]
+    partial class AddCompniesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,8 +93,8 @@ namespace Bookstore.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("PhoneNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("PostalCode")
                         .HasColumnType("nvarchar(max)");
@@ -105,38 +108,6 @@ namespace Bookstore.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            City = "Auckland",
-                            Name = "Penguin Random House",
-                            PhoneNumber = "+64-9-442-7400",
-                            PostalCode = "0632",
-                            State = "New Zealand",
-                            StreetAddress = "67 Apollo Drive Rosedale"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            City = "Auckland",
-                            Name = "Harper Collins",
-                            PhoneNumber = "",
-                            PostalCode = "1140",
-                            State = "New Zealand",
-                            StreetAddress = "PO Box 1, Shortland Street"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            City = "Sydney",
-                            Name = "Simon and Schuster",
-                            PhoneNumber = "+61-2-9983-6600",
-                            PostalCode = "2062",
-                            State = "Australia",
-                            StreetAddress = "Suite 19a, Level 1, Building C, 450 Miller Street"
-                        });
                 });
 
             modelBuilder.Entity("Bookstore.Models.Models.Product", b =>
@@ -462,10 +433,6 @@ namespace Bookstore.DataAccess.Migrations
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CompanyId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -482,8 +449,6 @@ namespace Bookstore.DataAccess.Migrations
 
                     b.Property<string>("StreetAddress")
                         .HasColumnType("nvarchar(max)");
-
-                    b.HasIndex("CompanyId");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
@@ -548,17 +513,6 @@ namespace Bookstore.DataAccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Bookstore.Models.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("Bookstore.Models.Models.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
                 });
 #pragma warning restore 612, 618
         }

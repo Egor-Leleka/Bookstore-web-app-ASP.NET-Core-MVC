@@ -6,16 +6,16 @@ namespace Bookstore.DataAccess.Repository
 {
 	public class CategoryRepository : Repository<Category>, ICategoryRepository
 	{
-		private readonly Entities _entitiy;
+		private readonly Entities _entities;
 
 		public CategoryRepository(Entities entities) : base(entities)
 		{
-			_entitiy = entities;
+			_entities = entities;
 		}
 
 		public void Update(Category category)
 		{
-			_entitiy.Update(category);
+			_entities.Update(category);
 		}
 	}
 }
