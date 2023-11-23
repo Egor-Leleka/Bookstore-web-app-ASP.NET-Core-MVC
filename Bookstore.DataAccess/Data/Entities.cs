@@ -13,6 +13,7 @@ namespace Bookstore.DataAccess.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
 
         public Entities(DbContextOptions<Entities> options) : base(options) { }
 

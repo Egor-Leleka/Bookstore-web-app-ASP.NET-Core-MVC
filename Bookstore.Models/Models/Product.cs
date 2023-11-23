@@ -39,7 +39,7 @@ namespace Bookstore.Models.Models
 		public decimal Price { get; set; }
 
 		[Required]
-		[DisplayName("Price 50-100")]
+		[DisplayName("Price 51-100")]
 		public decimal Price50 { get; set; }
 
 		[Required]

@@ -9,6 +9,8 @@ namespace Bookstore.DataAccess.Repository
 		public ICategoryRepository Category { get; private set; }
 		public IProductRepository Product { get; private set; }
 		public ICompanyRepository Company { get; private set; }
+		public IShoppingCartRepository ShoppingCart { get; private set; }
+		public IApplicationUserRepository ApplicationUser { get; private set; }
 
 		public UnitOfWork(Entities entities)
         {
@@ -16,6 +18,8 @@ namespace Bookstore.DataAccess.Repository
 			Category = new CategoryRepository(_entities);
 			Product = new ProductRepository(_entities);
 			Company = new CompanyRepository(_entities);
+			ShoppingCart = new ShoppingCartRepository(_entities);
+			ApplicationUser = new ApplicationUserRepository(_entities);
         }
 
 		public void Save()

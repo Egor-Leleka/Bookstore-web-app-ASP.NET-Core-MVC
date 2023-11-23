@@ -11,7 +11,7 @@ namespace Bookstore.DataAccess.Repository
 {
 	internal class ProductRepository : Repository<Product>, IProductRepository
 	{
-		private readonly Entities _entities;
+		private Entities _entities;
 
 		public ProductRepository(Entities entities) : base(entities)
 		{

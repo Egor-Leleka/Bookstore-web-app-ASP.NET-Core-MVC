@@ -6,7 +6,7 @@ namespace Bookstore.DataAccess.Repository
 {
 	public class CategoryRepository : Repository<Category>, ICategoryRepository
 	{
-		private readonly Entities _entities;
+		private Entities _entities;
 
 		public CategoryRepository(Entities entities) : base(entities)
 		{

@@ -11,7 +11,7 @@ namespace Bookstore.DataAccess.Repository
 {
     internal class CompanyRepository : Repository<Company>, ICompanyRepository
     {
-        private readonly Entities _entities;
+        private Entities _entities;
 
         public CompanyRepository(Entities entities) : base(entities)
         {

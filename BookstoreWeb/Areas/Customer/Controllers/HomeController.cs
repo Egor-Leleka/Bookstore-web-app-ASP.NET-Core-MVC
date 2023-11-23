@@ -1,7 +1,10 @@
 ﻿using Bookstore.DataAccess.Repository.IRepository;
 using Bookstore.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BookstoreWeb.Areas.Customer.Controllers
 {
@@ -24,11 +27,45 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 			return View(productList);
 		}
 
-		public IActionResult Details(int? id)
+		public IActionResult Details(int productId)
 		{
-			var product = _unitOfWork.Product.Get(p => p.Id == id, includeProperties: "Category");
+			ShoppingCart shoppingCart = new()
+			{
+				Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category"),
+				Count = 1,
+				ProductId = productId
+			};
 
-			return View(product);
+			return View(shoppingCart);
+		}
+
+		[HttpPost]
+		[Authorize]
+		public IActionResult Details(ShoppingCart shoppingCart)
+		{
+			var claimsIdentity = (ClaimsIdentity)User.Identity;
+			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+			shoppingCart.ApplicationUserId = userId;
+
+			ShoppingCart shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(u => u.ApplicationUserId == userId &&
+				u.ProductId == shoppingCart.ProductId);
+
+			if (shoppingCartFromDb != null)
+			{
+				//shopping cart exists
+				shoppingCartFromDb.Count += shoppingCart.Count;
+				_unitOfWork.ShoppingCart.Update(shoppingCartFromDb);
+			}
+			else
+			{
+				//add cart record
+				_unitOfWork.ShoppingCart.Add(shoppingCart);
+			}
+
+			_unitOfWork.Save();
+			TempData["success"] = "Item added to the Cart successfully";
+
+			return RedirectToAction(nameof(Index));
 		}
 
 		public IActionResult Privacy()
