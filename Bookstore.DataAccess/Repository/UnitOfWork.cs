@@ -11,6 +11,8 @@ namespace Bookstore.DataAccess.Repository
 		public ICompanyRepository Company { get; private set; }
 		public IShoppingCartRepository ShoppingCart { get; private set; }
 		public IApplicationUserRepository ApplicationUser { get; private set; }
+		public IOrderHeaderRepository OrderHeader { get; private set; }
+		public IOrderDetailRepository OrderDetail { get; private set; }
 
 		public UnitOfWork(Entities entities)
         {
@@ -20,6 +22,8 @@ namespace Bookstore.DataAccess.Repository
 			Company = new CompanyRepository(_entities);
 			ShoppingCart = new ShoppingCartRepository(_entities);
 			ApplicationUser = new ApplicationUserRepository(_entities);
+			OrderHeader = new OrderHeaderRepository(_entities);
+			OrderDetail = new OrderDetailRepository(_entities);
         }
 
 		public void Save()
