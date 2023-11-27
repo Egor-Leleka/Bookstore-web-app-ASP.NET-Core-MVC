@@ -78,5 +78,7 @@ namespace Bookstore.DataAccess.Repository
 			}
 			return query.ToList();
 		}
+
+		
 	}
 }
