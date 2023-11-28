@@ -55,12 +55,15 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 
 		public IActionResult Minus(int cartId)
 		{
-			var shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(s => s.Id == cartId);
+			var shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(s => s.Id == cartId, tracked: true);
 
-			if (shoppingCartFromDb.Count == 0)
-				_unitOfWork.ShoppingCart.Remove(shoppingCartFromDb);
+			if (shoppingCartFromDb.Count <= 1)
+				
+			_unitOfWork.ShoppingCart.Remove(shoppingCartFromDb);
 			else
 				shoppingCartFromDb.Count -= 1;
+			HttpContext.Session.SetInt32(StaticDetails.SessionCart, _unitOfWork.ShoppingCart
+				.GetAll(u => u.ApplicationUserId == shoppingCartFromDb.ApplicationUserId).Count() - 1);
 			_unitOfWork.ShoppingCart.Update(shoppingCartFromDb);
 
 
@@ -71,10 +74,13 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 
 		public IActionResult Remove(int cartId)
 		{
-			var shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(s => s.Id == cartId);
+			var shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(s => s.Id == cartId, tracked: true);
+			HttpContext.Session.SetInt32(StaticDetails.SessionCart, _unitOfWork.ShoppingCart
+				.GetAll(u => u.ApplicationUserId == shoppingCartFromDb.ApplicationUserId).Count() - 1);
 			_unitOfWork.ShoppingCart.Remove(shoppingCartFromDb);
+			
 			_unitOfWork.Save();
-
+			
 			return RedirectToAction(nameof(Index));
 		}
 

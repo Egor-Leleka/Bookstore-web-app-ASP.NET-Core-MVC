@@ -1,5 +1,6 @@
 ﻿using Bookstore.DataAccess.Repository.IRepository;
 using Bookstore.Models.Models;
+using Bookstore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
@@ -22,6 +23,15 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 
 		public IActionResult Index()
 		{
+			var claimsIdentity = (ClaimsIdentity)User.Identity;
+			var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+			if (claim != null)
+			{
+				HttpContext.Session.SetInt32(StaticDetails.SessionCart,
+					_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Count());
+			}
+
 			IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category");
 
 			return View(productList);
@@ -55,14 +65,18 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 				//shopping cart exists
 				shoppingCartFromDb.Count += shoppingCart.Count;
 				_unitOfWork.ShoppingCart.Update(shoppingCartFromDb);
+				_unitOfWork.Save();
 			}
 			else
 			{
 				//add cart record
 				_unitOfWork.ShoppingCart.Add(shoppingCart);
+				_unitOfWork.Save();
+
+				HttpContext.Session.SetInt32(StaticDetails.SessionCart, 
+					_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count());
 			}
 
-			_unitOfWork.Save();
 			TempData["success"] = "Item added to the Cart successfully";
 
 			return RedirectToAction(nameof(Index));
