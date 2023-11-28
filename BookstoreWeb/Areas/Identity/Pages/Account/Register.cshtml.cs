@@ -111,7 +111,6 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
             public string FirstName { get; set; }
             [Required]
             public string LastName { get; set; }
-
             public string? StreetAddress { get; set; }
 			public string? City { get; set; }
 			public string? State { get; set; }

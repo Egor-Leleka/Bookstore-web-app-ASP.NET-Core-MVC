@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Bookstore.Models.Models;
+using Bookstore.Utility;
 
 namespace BookstoreWeb.Areas.Identity.Pages.Account
 {
@@ -84,7 +86,17 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
-        }
+
+			[Required]
+			public string FirstName { get; set; }
+			[Required]
+			public string LastName { get; set; }
+			public string? StreetAddress { get; set; }
+			public string? City { get; set; }
+			public string? State { get; set; }
+			public string? PostalCode { get; set; }
+			public string? PhoneNumber { get; set; }
+		}
         
         public IActionResult OnGet() => RedirectToPage("./Login");
 
@@ -131,7 +143,12 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
                 {
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        FirstName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                        LastName = info.Principal.FindFirstValue(ClaimTypes.Name),
+                        StreetAddress = info.Principal.FindFirstValue(ClaimTypes.StreetAddress),
+                        State = info.Principal.FindFirstValue(ClaimTypes.Country),
+                        PostalCode = info.Principal.FindFirstValue(ClaimTypes.PostalCode)
                     };
                 }
                 return Page();
@@ -153,7 +170,14 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+				user.FirstName = Input.FirstName;
+				user.LastName = Input.LastName;
+				user.StreetAddress = Input.StreetAddress;
+				user.City = Input.City;
+				user.PostalCode = Input.PostalCode;
+				user.PhoneNumber = Input.PhoneNumber;
+
+				await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);
@@ -162,6 +186,7 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
+                        await _userManager.AddToRoleAsync(user, StaticDetails.Role_Customer);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                         var userId = await _userManager.GetUserIdAsync(user);
@@ -197,11 +222,11 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private ApplicationUser CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<IdentityUser>();
+                return Activator.CreateInstance<ApplicationUser>();
             }
             catch
             {
