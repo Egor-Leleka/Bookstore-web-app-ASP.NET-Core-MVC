@@ -227,6 +227,7 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 						id, StaticDetails.StatusApproved, StaticDetails.PaymentStatusApproved);
 					_unitOfWork.Save();
 				}
+				HttpContext.Session.Clear();
 			}
 
 			List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart

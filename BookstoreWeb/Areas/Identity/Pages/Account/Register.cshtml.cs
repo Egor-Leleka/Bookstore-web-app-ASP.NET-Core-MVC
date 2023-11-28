@@ -107,20 +107,20 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
 			[ValidateNever]
 			public IEnumerable<SelectListItem> RoleList { get; set; }
 
-            [Required]
-            public string FirstName { get; set; }
-            [Required]
-            public string LastName { get; set; }
-            public string? StreetAddress { get; set; }
+			[Required]
+			public string FirstName { get; set; }
+			[Required]
+			public string LastName { get; set; }
+			public string? StreetAddress { get; set; }
 			public string? City { get; set; }
 			public string? State { get; set; }
 			public string? PostalCode { get; set; }
 			public string? PhoneNumber { get; set; }
 
-            public int? CompanyId { get; set; }
-            [ValidateNever]
-            public IEnumerable<SelectListItem> CompanyList { get; set; }
-        }
+			public int? CompanyId { get; set; }
+			[ValidateNever]
+			public IEnumerable<SelectListItem> CompanyList { get; set; }
+		}
 
 
 		public async Task OnGetAsync(string returnUrl = null)
@@ -180,7 +180,7 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
 					if (!String.IsNullOrEmpty(Input.Role))
 						await _userManager.AddToRoleAsync(user, Input.Role);
 					else
-                        await _userManager.AddToRoleAsync(user, StaticDetails.Role_Customer);
+						await _userManager.AddToRoleAsync(user, StaticDetails.Role_Customer);
 
 
 					var userId = await _userManager.GetUserIdAsync(user);
@@ -201,7 +201,11 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
 					}
 					else
 					{
-						await _signInManager.SignInAsync(user, isPersistent: false);
+						if (User.IsInRole(StaticDetails.Role_Admin) || User.IsInRole(StaticDetails.Role_Employee))
+							TempData["success"] = "New user created successfully!";
+						else
+							await _signInManager.SignInAsync(user, isPersistent: false);
+
 						return LocalRedirect(returnUrl);
 					}
 				}
@@ -229,7 +233,7 @@ namespace BookstoreWeb.Areas.Identity.Pages.Account
 			}
 		}
 
-        private IUserEmailStore<IdentityUser> GetEmailStore()
+		private IUserEmailStore<IdentityUser> GetEmailStore()
 		{
 			if (!_userManager.SupportsUserEmail)
 			{
