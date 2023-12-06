@@ -37,16 +37,19 @@
 								</a>
 								<ul class="dropdown-menu">
 									<li>
-										<a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+										<a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Categories</a>
 									</li>
 									<li>
-										<a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+										<a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Products</a>
 									</li>
 									<li>
-										<a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
+										<a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Companies</a>
 									</li>
 									<li>
 										<a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Create User</a>
+									</li>
+									<li>
+										<a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Users</a>
 									</li>
 								</ul>
 							</li>
@@ -81,6 +84,7 @@
 	<script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
 	<script src="https://cdn.tiny.cloud/1/qix0hgf4ke0i6769ssm077bdipf4dv6xt46rlg9fz9xa63tb/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
