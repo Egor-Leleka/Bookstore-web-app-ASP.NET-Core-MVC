@@ -34,8 +34,11 @@ namespace BookstoreWeb.Areas.Customer.Controllers
 				OrderHeader = new()
 			};
 
+			IEnumerable<ProductImage> productImages = _unitOfWork.ProductImage.GetAll();
+
 			foreach (var shoppingCart in ShoppingCartViewModel.ShoppingCartList)
 			{
+				shoppingCart.Product.ProductImages = productImages.Where(u=> u.ProductId == shoppingCart.Product.Id).ToList();
 				shoppingCart.Price = GetPriceBasedOnQuantity(shoppingCart);
 				ShoppingCartViewModel.OrderHeader.OrderTotal += (shoppingCart.Price * shoppingCart.Count);
 			}

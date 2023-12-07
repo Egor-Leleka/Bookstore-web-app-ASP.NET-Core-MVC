@@ -1,4 +1,6 @@
 ﻿using Bookstore.DataAccess.Data;
+using Bookstore.DataAccess.Repository;
+using Bookstore.DataAccess.Repository.IRepository;
 using Bookstore.Models.Models;
 using Bookstore.Models.ViewModels;
 using Bookstore.Utility;
@@ -14,13 +16,18 @@ namespace BookstoreWeb.Areas.Admin.Controllers
     [Authorize(Roles = StaticDetails.Role_Admin)]
     public class UserController : Controller
     {
-        private readonly Entities _entities;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserController(Entities entities, UserManager<IdentityUser> userManager)
+        public UserController(
+            RoleManager<IdentityRole> roleManager,
+            UserManager<IdentityUser> userManager,
+            IUnitOfWork unitOfWork)
         {
-            _entities = entities;
             _userManager = userManager;
+            _unitOfWork = unitOfWork;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
@@ -32,24 +39,24 @@ namespace BookstoreWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult RoleManagment(string userId)
         {
-            string roleId = _entities.UserRoles.FirstOrDefault(u => u.UserId == userId).RoleId;
-
             RoleManagmentViewModel roleVM = new RoleManagmentViewModel()
             {
-                ApplicationUser = _entities.ApplicationUsers.Include(u => u.Company).FirstOrDefault(u => u.Id == userId),
-                RoleList = _entities.Roles.Select(u => new SelectListItem
+				ApplicationUser = _unitOfWork.ApplicationUser.Get(u => u.Id == userId, includeProperties: "Company"),
+                RoleList = _roleManager.Roles.Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Name
                 }),
-                CompanyList = _entities.Companies.Select(u => new SelectListItem
+                CompanyList = _unitOfWork.Company.GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
                 })
             };
 
-            roleVM.ApplicationUser.Role = _entities.Roles.FirstOrDefault(u => u.Id == roleId).Name;
+            roleVM.ApplicationUser.Role = _userManager
+                .GetRolesAsync(_unitOfWork.ApplicationUser.Get(u=>u.Id == userId))
+                .GetAwaiter().GetResult().FirstOrDefault();
 
             return View(roleVM);
         }
@@ -57,24 +64,35 @@ namespace BookstoreWeb.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult RoleManagment(RoleManagmentViewModel roleVm)
         {
-            string roleId = _entities.UserRoles.FirstOrDefault(u => u.UserId == roleVm.ApplicationUser.Id).RoleId;
-            string oldRole = _entities.Roles.FirstOrDefault(u => u.Id == roleId).Name;
+            string oldRole = _userManager
+				.GetRolesAsync(_unitOfWork.ApplicationUser.Get(u => u.Id == roleVm.ApplicationUser.Id))
+				.GetAwaiter().GetResult().FirstOrDefault();
 
-            if (!(roleVm.ApplicationUser.Role == oldRole))
+			ApplicationUser applicationUser = _unitOfWork.ApplicationUser
+					.Get(u => u.Id == roleVm.ApplicationUser.Id);
+
+			if (!(roleVm.ApplicationUser.Role == oldRole))
             {
-                ApplicationUser applicationUser = _entities.ApplicationUsers
-                    .FirstOrDefault(u => u.Id == roleVm.ApplicationUser.Id);
-
                 if (roleVm.ApplicationUser.Role == StaticDetails.Role_Company)
                     applicationUser.CompanyId = roleVm.ApplicationUser.CompanyId;
 
                 if (oldRole == StaticDetails.Role_Company)
                     applicationUser.CompanyId = null;
 
-                _entities.SaveChanges();
+				_unitOfWork.ApplicationUser.Update(applicationUser);
+				_unitOfWork.Save();
 
                 _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
                 _userManager.AddToRoleAsync(applicationUser, roleVm.ApplicationUser.Role).GetAwaiter().GetResult();
+            }
+            else
+            {
+                if(oldRole == StaticDetails.Role_Company && applicationUser.CompanyId != roleVm.ApplicationUser.CompanyId)
+                {
+                    applicationUser.CompanyId=roleVm.ApplicationUser.CompanyId;
+                    _unitOfWork.ApplicationUser.Update(applicationUser);
+                    _unitOfWork.Save();
+                }
             }
 
             return RedirectToAction("Index");
@@ -87,14 +105,11 @@ namespace BookstoreWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<ApplicationUser> userList = _entities.ApplicationUsers.Include(u => u.Company).ToList();
-            var userRoles = _entities.UserRoles.ToList();
-            var roles = _entities.Roles.ToList();
-
+            List<ApplicationUser> userList = _unitOfWork.ApplicationUser.GetAll(includeProperties: "Company").ToList();
+            
             foreach (var user in userList)
             {
-                var roleId = userRoles.FirstOrDefault(u => u.UserId == user.Id).RoleId;
-                user.Role = roles.FirstOrDefault(u => u.Id == roleId).Name;
+                user.Role = _userManager.GetRolesAsync(user).GetAwaiter().GetResult().FirstOrDefault();
 
                 if (user.Company == null)
                 {
@@ -109,17 +124,18 @@ namespace BookstoreWeb.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult LockUnlock([FromBody] string id)
         {
-            var user = _entities.ApplicationUsers.FirstOrDefault(u => u.Id == id);
+            var userFromDb = _unitOfWork.ApplicationUser.Get(u => u.Id == id);
 
-            if (user == null)
+            if (userFromDb == null)
                 return Json(new { sucsess = false, message = "Error while Locking/Unlicking user" });
 
-            if (user.LockoutEnd != null && user.LockoutEnd > DateTime.Now)
-                user.LockoutEnd = DateTime.Now; // Unlock locked user.
+            if (userFromDb.LockoutEnd != null && userFromDb.LockoutEnd > DateTime.Now)
+				userFromDb.LockoutEnd = DateTime.Now; // Unlock locked user.
             else
-                user.LockoutEnd = DateTime.Now.AddYears(100); // Lock user for 100 years.
-
-            _entities.SaveChanges();
+				userFromDb.LockoutEnd = DateTime.Now.AddYears(100); // Lock user for 100 years.
+            
+            _unitOfWork.ApplicationUser.Update(userFromDb);
+            _unitOfWork.Save();
 
             return Json(new { success = true, message = "User Locked/UnLocked successfully" });
         }

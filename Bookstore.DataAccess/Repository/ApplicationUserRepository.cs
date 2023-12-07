@@ -16,5 +16,10 @@ namespace Bookstore.DataAccess.Repository
 		{
 			_entities = entities;
 		}
+
+		public void Update(ApplicationUser applicationUser)
+		{
+			_entities.ApplicationUsers.Update(applicationUser);
+		}
 	}
 }
