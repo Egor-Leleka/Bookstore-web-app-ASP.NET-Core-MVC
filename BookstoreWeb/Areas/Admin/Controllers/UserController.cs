@@ -114,7 +114,6 @@ namespace BookstoreWeb.Areas.Admin.Controllers
                 if (user.Company == null)
                 {
                     user.Company = new Company { Name = "" };
-
                 }
             }
 
@@ -140,9 +139,6 @@ namespace BookstoreWeb.Areas.Admin.Controllers
             return Json(new { success = true, message = "User Locked/UnLocked successfully" });
         }
 
-
         #endregion
-
-
     }
 }
