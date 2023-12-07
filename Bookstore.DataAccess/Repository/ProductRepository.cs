@@ -33,9 +33,7 @@ namespace Bookstore.DataAccess.Repository
 				productFromDb.Description = product.Description;
 				productFromDb.Category = product.Category;
 				productFromDb.CategoryId = product.CategoryId;
-
-				if (product.ImageUrl != null )
-					productFromDb.ImageUrl = product.ImageUrl;
+				productFromDb.ProductImages = product.ProductImages;
 			}
 		}
 	}

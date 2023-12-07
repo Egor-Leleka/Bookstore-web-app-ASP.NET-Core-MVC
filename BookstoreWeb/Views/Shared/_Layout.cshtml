@@ -1,5 +1,6 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
@@ -81,10 +82,10 @@
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
-	<script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
-	<script src="https://cdn.tiny.cloud/1/qix0hgf4ke0i6769ssm077bdipf4dv6xt46rlg9fz9xa63tb/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="//cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js" asp-append-version="true"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+	<script src="https://cdn.tiny.cloud/1/qix0hgf4ke0i6769ssm077bdipf4dv6xt46rlg9fz9xa63tb/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

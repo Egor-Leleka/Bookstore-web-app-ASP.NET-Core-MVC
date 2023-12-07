@@ -16,6 +16,7 @@ namespace Bookstore.DataAccess.Data
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<OrderHeader> OrderHeaders { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
 
         public Entities(DbContextOptions<Entities> options) : base(options) { }
 
@@ -57,8 +58,7 @@ namespace Bookstore.DataAccess.Data
                     Price = 21.99m,
                     Price50 = 18.99m,
                     Price100 = 15.99m,
-                    CategoryId = 1,
-                    ImageUrl = ""
+                    CategoryId = 1
                 },
 
                 new Product
@@ -81,8 +81,7 @@ namespace Bookstore.DataAccess.Data
                     Price = 21.99m,
                     Price50 = 18.99m,
                     Price100 = 15.99m,
-                    CategoryId = 3,
-                    ImageUrl = ""
+                    CategoryId = 3
                 },
 
                 new Product
@@ -101,8 +100,7 @@ namespace Bookstore.DataAccess.Data
                     Price = 21.99m,
                     Price50 = 18.99m,
                     Price100 = 15.99m,
-                    CategoryId = 1,
-                    ImageUrl = ""
+                    CategoryId = 1
                 },
 
                 new Product
@@ -123,8 +121,7 @@ namespace Bookstore.DataAccess.Data
                     Price = 21.99m,
                     Price50 = 18.99m,
                     Price100 = 15.99m,
-                    CategoryId = 2,
-                    ImageUrl = ""
+                    CategoryId = 2
                 }
             );
 

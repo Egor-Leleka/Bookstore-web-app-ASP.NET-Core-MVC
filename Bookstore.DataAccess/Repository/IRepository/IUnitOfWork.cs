@@ -8,8 +8,9 @@ namespace Bookstore.DataAccess.Repository.IRepository
 		ICompanyRepository Company { get; }
 		IShoppingCartRepository ShoppingCart { get; }
 		IApplicationUserRepository ApplicationUser { get; }
-		public IOrderHeaderRepository OrderHeader { get; }
-		public IOrderDetailRepository OrderDetail { get; }
+		IOrderHeaderRepository OrderHeader { get; }
+		IOrderDetailRepository OrderDetail { get; }
+		IProductImageRepository ProductImage { get; }
 		void Save();
 	}
 }

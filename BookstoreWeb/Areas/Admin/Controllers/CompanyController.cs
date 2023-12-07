@@ -65,35 +65,6 @@ namespace BookstoreWeb.Areas.Admin.Controllers
 
 		}
 
-		/*
-        [HttpGet]
-        public IActionResult Delete(int? id)
-        {
-            var company = _unitOfWork.Company.Get(p => p.Id == id);
-
-            if (company == null)
-                return NotFound();
-
-            return View(company);
-        }
-        */
-
-		/*
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePost(int? id)
-        {
-            var company = _unitOfWork.Company.Get(p => p.Id == id);
-
-            if (company == null)
-                return NotFound();
-
-            _unitOfWork.Company.Remove(company);
-            _unitOfWork.Save();
-            TempData["success"] = "Product deleted seccessfully!";
-            return RedirectToAction("Index", "Company");
-        }
-        */
-
 		#region API CALLS
 
 		[HttpGet]
